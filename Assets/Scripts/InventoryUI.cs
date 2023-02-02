@@ -16,25 +16,11 @@ public class InventoryUI : MonoBehaviour
     public GameObject selection;
     void Start()
     {
-        // pour chaque élément d'inventaire
-        for (int i = 0; i < inventory.items.Count; i++)
-        {
-            Item item = inventory.items[i];
-            // créer un objet UI pour représenter l'élément
-            GameObject itemUI = new GameObject(item.name);
-            inventoryUI.Add(itemUI);
-            Image image = itemUI.AddComponent<Image>();
-            image.sprite = item.itemSprite;
-            // positionner l'objet UI sur un cercle autour du centre de l'interface utilisateur
-            float angle = i * (360f / inventory.items.Count);
-            float x = radius * Mathf.Sin(angle * Mathf.Deg2Rad);
-            float y = radius * Mathf.Cos(angle * Mathf.Deg2Rad);
-            itemUI.transform.SetParent(container);
-            itemUI.transform.localPosition = new Vector3(x, y, 0);
-        }
+        GenerateButtons();
     }
     void Update()
     {
+        RefreshDisplayUIItem();
         // Get mouse or controller input
         Vector2 mousePosition = Mouse.current.position.ReadValue();
         //Vector2 joystickDirection = InputSystem.GetDevice<Gamepad>().leftStick.ReadValue();
@@ -66,6 +52,51 @@ public class InventoryUI : MonoBehaviour
                 closestDistance = distance;
                 selectedItem = inventory.items[i];
             }
+        }
+        Debug.Log(selectedItem, selectedItem);
+    }
+
+    private void GenerateButtons()
+    {
+        foreach(var itemUi in inventoryUI)
+        {
+            Destroy(itemUi);
+        }
+        inventoryUI.Clear();
+        // pour chaque élément d'inventaire
+        for (int i = 0; i < inventory.items.Count; i++)
+        { 
+            Item item = inventory.items[i];
+            if(item == null)
+            {
+                continue;
+            }
+            // créer un objet UI pour représenter l'élément
+            GameObject itemUI = new GameObject(item.name);
+            inventoryUI.Add(itemUI);
+            Image image = itemUI.AddComponent<Image>();
+            image.sprite = item.itemSprite;
+            // positionner l'objet UI sur un cercle autour du centre de l'interface utilisateur
+            float angle = i * (360f / inventory.items.Count);
+            float x = radius * Mathf.Sin(angle * Mathf.Deg2Rad);
+            float y = radius * Mathf.Cos(angle * Mathf.Deg2Rad);
+            itemUI.transform.SetParent(container);
+            itemUI.transform.localPosition = new Vector3(x, y, 0);
+        }
+    }
+     private void RefreshDisplayUIItem()
+    {
+        if (inventory.items.Count != inventoryUI.Count)
+        {
+            GenerateButtons();
+            return;
+        }
+        for (int i = 0; i < inventory.items.Count; i++)
+        {
+            var gameObjectItemUI = inventoryUI[i];
+            var item = inventory.items[i];
+            Image image = gameObjectItemUI.GetComponent<Image>();
+            image.sprite = item.itemSprite;
         }
     }
 }
